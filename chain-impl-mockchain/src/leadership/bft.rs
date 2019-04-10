@@ -6,6 +6,7 @@ use crate::{
 };
 use chain_core::mempack::{ReadBuf, ReadError, Readable};
 use chain_core::property;
+use chain_crypto::bech32::{Bech32, Error as Bech32Error};
 use chain_crypto::{Ed25519Extended, PublicKey, SecretKey};
 use std::sync::Arc;
 
@@ -102,6 +103,18 @@ impl AsRef<[u8]> for LeaderId {
 impl From<PublicKey<SIGNING_ALGORITHM>> for LeaderId {
     fn from(v: PublicKey<SIGNING_ALGORITHM>) -> Self {
         LeaderId(v)
+    }
+}
+
+impl Bech32 for LeaderId {
+    const BECH32_HRP: &'static str = PublicKey::<SIGNING_ALGORITHM>::BECH32_HRP;
+
+    fn try_from_bech32_str(s: &str) -> Result<Self, Bech32Error> {
+        PublicKey::<SIGNING_ALGORITHM>::try_from_bech32_str(s).map(Self)
+    }
+
+    fn to_bech32_str(&self) -> String {
+        self.0.to_bech32_str()
     }
 }
 
